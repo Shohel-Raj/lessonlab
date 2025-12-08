@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { FiMoon, FiSunset } from "react-icons/fi";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../Context/useAuth";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+  const { loading, user, signOutUser } = useAuth();
+  const navigate = useNavigate();
 
-  // Apply theme to HTML
+  console.log(user);
+  // Apply theme
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
+
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const activeStyle =
     "font-semibold text-primary relative after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-primary after:rounded-full";
@@ -42,54 +55,56 @@ const Navbar = () => {
         </NavLink>
       </li>
 
-      <li>
-        <NavLink
-          to="/dashboard/add-lesson"
-          className={({ isActive }) =>
-            isActive ? activeStyle : "hover:text-primary transition"
-          }
-        >
-          Add Lesson
-        </NavLink>
-      </li>
+      {/* Private routes */}
+      {user && (
+        <>
+          <li>
+            <NavLink
+              to="/dashboard/add-lesson"
+              className={({ isActive }) =>
+                isActive ? activeStyle : "hover:text-primary transition"
+              }
+            >
+              Add Lesson
+            </NavLink>
+          </li>
 
-      <li>
-        <NavLink
-          to="/dashboard/my-lessons"
-          className={({ isActive }) =>
-            isActive ? activeStyle : "hover:text-primary transition"
-          }
-        >
-          My Lessons
-        </NavLink>
-      </li>
+          <li>
+            <NavLink
+              to="/dashboard/my-lessons"
+              className={({ isActive }) =>
+                isActive ? activeStyle : "hover:text-primary transition"
+              }
+            >
+              My Lessons
+            </NavLink>
+          </li>
 
-      <li>
-        <NavLink
-          to="/pricing"
-          className={({ isActive }) =>
-            isActive ? activeStyle : "hover:text-primary transition"
-          }
-        >
-          Pricing
-        </NavLink>
-      </li>
+          <li>
+            <NavLink
+              to="/pricing"
+              className={({ isActive }) =>
+                isActive ? activeStyle : "hover:text-primary transition"
+              }
+            >
+              Pricing
+            </NavLink>
+          </li>
+        </>
+      )}
     </>
   );
 
   return (
     <div className="relative">
-      <div className="navbar bg-base-100 shadow-sm w-full">
+      <div className="navbar  pl-0">
         {/* LEFT — LOGO */}
-        <a href="/" className="navbar-start btn btn-ghost text-2xl font-bold">
-          LifeVerse
-        </a>
+        <NavLink to="/" className="navbar-start  text-2xl font-bold pl-0">
+          LessonLab
+        </NavLink>
 
-        {/* RIGHT — MOBILE MENU BUTTON */}
+        {/* MOBILE MENU BUTTON */}
         <div className="navbar-end lg:hidden flex items-center gap-2">
-         
-
-          {/* Hamburger Button */}
           <motion.button
             onClick={() => setOpen(true)}
             whileTap={{ scale: 0.9 }}
@@ -119,9 +134,8 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* DESKTOP — Theme + Login */}
+        {/* DESKTOP — Theme + Login/User */}
         <div className="navbar-end hidden lg:flex gap-3 items-center">
-          {/* Animated Theme Toggle */}
           <motion.button
             onClick={toggleTheme}
             whileTap={{ scale: 0.8 }}
@@ -150,12 +164,58 @@ const Navbar = () => {
             </AnimatePresence>
           </motion.button>
 
-          <a href="/login" className="btn btn-outline">
-            Login
-          </a>
-          <a href="/register" className="btn btn-primary">
-            Signup
-          </a>
+          {/* Conditional Login/Signup or User Dropdown */}
+          {!loading && !user && (
+            <>
+              <NavLink to="/auth/login" className="btn btn-outline">
+                Login
+              </NavLink>
+              <NavLink to="/auth/register" className="btn btn-primary">
+                Signup
+              </NavLink>
+            </>
+          )}
+
+          {!loading && user && (
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                <div className="w-10 rounded-full">
+                  <img
+                    src={user?.photoURL || "/default-avatar.png"}
+                    alt="User Avatar"
+                  />
+                </div>
+              </label>
+              <ul
+                tabIndex={0}
+                className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52"
+              >
+                <li>
+                  <span className="font-semibold">
+                    {user.displayName || "User"}
+                  </span>
+                </li>
+                <li>
+                  <NavLink to="/profile" className="hover:text-primary">
+                    Profile
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard" className="hover:text-primary">
+                    Dashboard
+                  </NavLink>
+                </li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="hover:text-red-500 text-left w-full"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -163,7 +223,6 @@ const Navbar = () => {
       <AnimatePresence>
         {open && (
           <>
-            {/* BACKDROP */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
@@ -173,7 +232,6 @@ const Navbar = () => {
               className="fixed inset-0 bg-black z-[50]"
             ></motion.div>
 
-            {/* DRAWER */}
             <motion.div
               key="drawer"
               initial={{ x: "100%" }}
@@ -193,7 +251,32 @@ const Navbar = () => {
               </div>
 
               <ul className="menu p-4 text-lg font-medium">{menuItems}</ul>
-
+              {!loading && !user && (
+                <>
+                  {" "}
+                  <div className="flex flex-col gap-3 w-10/12 mx-auto mt-10">
+                    <NavLink to="/auth/login" className="btn btn-outline">
+                      Login
+                    </NavLink>
+                    <NavLink to="/auth/register" className="btn btn-primary">
+                      Signup
+                    </NavLink>
+                  </div>
+                </>
+              )}
+              {user && (
+                <>
+                  <div className="flex flex-col gap-3 w-10/12 mx-auto mt-10">
+                    <button
+                    onClick={handleLogout}
+                    className="hover:text-red-500 text-left w-full btn btn-primary"
+                  >
+                    Logout
+                  </button>
+                  </div>
+                  
+                </>
+              )}
               {/* Mobile Theme Toggle */}
               <div className="px-4 mt-4">
                 <motion.button
