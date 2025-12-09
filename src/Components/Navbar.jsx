@@ -47,7 +47,7 @@ const Navbar = () => {
 
       <li>
         <NavLink
-          to="/public-lessons"
+          to="/lessons"
           className={({ isActive }) =>
             isActive ? activeStyle : "hover:text-primary transition"
           }
@@ -83,7 +83,7 @@ const Navbar = () => {
 
           <li>
             <NavLink
-              to="/pricing"
+              to="/upgrade-plan"
               className={({ isActive }) =>
                 isActive ? activeStyle : "hover:text-primary transition"
               }
