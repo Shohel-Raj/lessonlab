@@ -10,15 +10,17 @@ const router = createBrowserRouter([
     Component: MainLayout,
     children: [
       { index: true, Component: Home },
+      { path: "auth/login", Component: Login }, // becomes /auth/login
+      { path: "auth/register", Component: Register },
     ],
   },
-  {
-    path: "auth", // parent path
-    children: [
-      { path: "login", Component: Login }, // becomes /auth/login
-      { path: "register", Component: Register }, // becomes /auth/register
-    ],
-  },
+  // {
+  //   path: "auth", // parent path
+  //   children: [
+  //     { path: "login", Component: Login }, // becomes /auth/login
+  //     { path: "register", Component: Register }, // becomes /auth/register
+  //   ],
+  // },
 ]);
 
 export default router;

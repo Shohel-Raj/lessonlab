@@ -3,6 +3,7 @@ import { FiMoon, FiSunset } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../Context/useAuth";
+import LoaderSpainer from "./Loader/LoaderSpainer";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -94,6 +95,9 @@ const Navbar = () => {
       )}
     </>
   );
+  if (loading) {
+    return <LoaderSpainer />;
+  }
 
   return (
     <div className="relative">
@@ -268,13 +272,12 @@ const Navbar = () => {
                 <>
                   <div className="flex flex-col gap-3 w-10/12 mx-auto mt-10">
                     <button
-                    onClick={handleLogout}
-                    className="hover:text-red-500 text-left w-full btn btn-primary"
-                  >
-                    Logout
-                  </button>
+                      onClick={handleLogout}
+                      className="hover:text-red-500 text-left w-full btn btn-primary"
+                    >
+                      Logout
+                    </button>
                   </div>
-                  
                 </>
               )}
               {/* Mobile Theme Toggle */}
