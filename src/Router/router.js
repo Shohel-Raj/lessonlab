@@ -7,6 +7,8 @@ import PricingUpgradePage from "../Pages/PricingUpgradePage";
 import PublicLessons from "../Pages/PublicLessons";
 import LifeLessonDetailsPage from "../Pages/LifeLessonDetailsPage";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import DashboardHome from "../Pages/Dashboard/DashboardHome";
+import Profile from "../Pages/Profile";
 
 const router = createBrowserRouter([
   {
@@ -28,16 +30,19 @@ const router = createBrowserRouter([
         path: "/lessons",
         Component: PublicLessons,
       },
-      
     ],
   },
   {
-    path:"/dashboard",
-    Component:DashboardLayout,
-    children:[
+    path: "/dashboard",
+    Component: DashboardLayout,
+    children: [
+      { index: true, Component: DashboardHome },
+      {
+        path:"profile", Component: Profile
+      }
 
-    ]
-  }
+    ],
+  },
 ]);
 
 export default router;
