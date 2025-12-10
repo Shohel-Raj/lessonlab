@@ -233,7 +233,7 @@ const Navbar = () => {
               animate={{ opacity: 0.4 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="fixed inset-0 bg-black z-[50]"
+              className="fixed inset-0 bg-black z-50"
             ></motion.div>
 
             <motion.div
@@ -242,7 +242,7 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 120, damping: 18 }}
-              className="fixed top-0 right-0 h-full w-1/2 bg-base-100 shadow-lg z-[100]"
+              className="fixed top-0 right-0 h-full w-1/2 bg-base-100 shadow-lg z-100"
             >
               <div className="p-4 flex justify-end">
                 <motion.button

@@ -6,6 +6,7 @@ import Register from "../Auth/Register";
 import PricingUpgradePage from "../Pages/PricingUpgradePage";
 import PublicLessons from "../Pages/PublicLessons";
 import LifeLessonDetailsPage from "../Pages/LifeLessonDetailsPage";
+import DashboardLayout from "../Layouts/DashboardLayout";
 
 const router = createBrowserRouter([
   {
@@ -27,8 +28,16 @@ const router = createBrowserRouter([
         path: "/lessons",
         Component: PublicLessons,
       },
+      
     ],
   },
+  {
+    path:"/dashboard",
+    Component:DashboardLayout,
+    children:[
+
+    ]
+  }
 ]);
 
 export default router;
