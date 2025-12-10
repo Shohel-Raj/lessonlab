@@ -5,6 +5,7 @@ import Login from "../Auth/Login";
 import Register from "../Auth/Register";
 import PricingUpgradePage from "../Pages/PricingUpgradePage";
 import PublicLessons from "../Pages/PublicLessons";
+import LifeLessonDetailsPage from "../Pages/LifeLessonDetailsPage";
 
 const router = createBrowserRouter([
   {
@@ -15,16 +16,19 @@ const router = createBrowserRouter([
       { path: "auth/login", Component: Login },
       { path: "auth/register", Component: Register },
       {
-        path:"/upgrade-plan",
-        Component:PricingUpgradePage
+        path: "/upgrade-plan",
+        Component: PricingUpgradePage,
       },
       {
-        path:"/lessons",
-        Component:PublicLessons
-      }
+        path: "/lisson/:id",
+        Component: LifeLessonDetailsPage,
+      },
+      {
+        path: "/lessons",
+        Component: PublicLessons,
+      },
     ],
   },
-
 ]);
 
 export default router;

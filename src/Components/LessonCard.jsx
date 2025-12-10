@@ -48,7 +48,7 @@ const LessonCard = ({
     if (showLocked) {
       navigate("/taka"); // route for upgrade
     } else {
-      navigate("/no"); // route for normal view
+      navigate(`/lisson/${1}`); // route for normal view
     }
   };
 
