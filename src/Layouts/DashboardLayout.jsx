@@ -12,6 +12,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../Context/useAuth";
 import LoaderSpainer from "../Components/Loader/LoaderSpainer";
+import {  FaPlus } from "react-icons/fa";
 
 const DashboardLayout = () => {
   const [open, setOpen] = useState(true);
@@ -59,6 +60,12 @@ const DashboardLayout = () => {
               icon={<FiUser />}
               open={open}
               label="My Profile"
+            />
+            <SidebarLink
+              to="/dashboard/add-lesson"
+              icon={<FaPlus />}
+              open={open}
+              label="Add Lesson"
             />
             <SidebarLink
               to="/dashboard/my-lessons"

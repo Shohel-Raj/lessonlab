@@ -9,6 +9,7 @@ import LifeLessonDetailsPage from "../Pages/LifeLessonDetailsPage";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import DashboardHome from "../Pages/Dashboard/DashboardHome";
 import Profile from "../Pages/Profile";
+import AddLesson from "../Pages/Dashboard/AddLesson";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,9 @@ const router = createBrowserRouter([
       { index: true, Component: DashboardHome },
       {
         path:"profile", Component: Profile
+      },
+      {
+        path:"add-lesson", Component: AddLesson
       }
 
     ],
