@@ -43,8 +43,23 @@ const AddLesson = () => {
 
     try {
       setSubmitting(true);
-      await axios.post("/api/lessons", lessonData);
-      toast.success("Lesson added successfully!");
+       axios
+      .post(`${import.meta.env.VITE_ApiCall}/addlesson`, lessonData, {
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
+      })
+      .then((res) => {
+        console.log(res)
+        // if (res.data.insertedId) {
+        //   toast.success('Lesson Successfully added');
+        //   e.target.reset();
+        // }
+      })
+      .catch((error) => {
+        toast.error(`${error.message} found`);
+      });
+
       setTitle("");
       setDescription("");
       setCategory(categories[0]);

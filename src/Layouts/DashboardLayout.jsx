@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router";
 import {
   FiMenu,
@@ -12,16 +12,32 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../Context/useAuth";
 import LoaderSpainer from "../Components/Loader/LoaderSpainer";
-import {  FaPlus } from "react-icons/fa";
+import { FaArrowAltCircleDown, FaArrowLeft, FaPlus } from "react-icons/fa";
+import { UserUtils } from "../Utils/UserUtils";
 
 const DashboardLayout = () => {
   const [open, setOpen] = useState(true);
   const { loading, user } = useAuth();
-
+  const [loggedUser, setLoggedUser] = useState(null);
   const sidebarVariants = {
     open: { width: "260px" },
     closed: { width: "70px" },
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken(); // get Firebase token
+        const data = await UserUtils.getCurrentUser(token); // fetch user from backend
+        setLoggedUser(data);
+      } catch (err) {
+        console.error("Error fetching logged user:", err);
+      }
+    };
+
+    fetchUser();
+  }, [user]);
 
   if (loading) {
     return <LoaderSpainer />;
@@ -87,16 +103,9 @@ const DashboardLayout = () => {
             />
 
             {/* Admin-specific links */}
-            {user?.role === "admin" && (
+            {loggedUser?.role === "admin" && (
               <>
-                <div className="border-t border-base-300 my-2"></div>{" "}
-                {/* separator */}
-                <SidebarLink
-                  to="/dashboard/admin"
-                  icon={<FiHome />}
-                  open={open}
-                  label="Admin Dashboard"
-                />
+               
                 <SidebarLink
                   to="/dashboard/admin/manage-users"
                   icon={<FiUser />}
@@ -117,6 +126,15 @@ const DashboardLayout = () => {
                 />
               </>
             )}
+
+             <div className="border-t border-base-300 mt-8"></div>{" "}
+                {/* separator */}
+                <SidebarLink
+                  to="/"
+                  icon={<FaArrowLeft />}
+                  open={open}
+                  label="Go Home"
+                />
           </nav>
         </div>
       </motion.aside>
@@ -132,7 +150,7 @@ const DashboardLayout = () => {
             <ThemeToggle />
             <div className="avatar">
               <div className="w-10 rounded-full border">
-                <img src="https://i.pravatar.cc/100" alt="user" />
+                <img src={user?.photoURL} alt="user" />
               </div>
             </div>
           </div>

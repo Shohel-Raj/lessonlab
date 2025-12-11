@@ -8,7 +8,7 @@ const Profile = () => {
   const { user, reloadUser } = useAuth(); 
   const [lessons, setLessons] = useState([]);
   const [updating, setUpdating] = useState(false);
-  const [displayName, setDisplayName] = useState(user?.name || "");
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
 
   useEffect(() => {
@@ -89,7 +89,7 @@ const Profile = () => {
 
       {/* User's Public Lessons */}
       <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
-        Public Lessons by {user?.name}
+        Public Lessons by {user?.displayName}
       </h3>
       {lessons.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-300">No lessons created yet.</p>

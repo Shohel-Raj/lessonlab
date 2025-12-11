@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../Context/useAuth";
 import Lottie from "lottie-react";
 import ImgLottie from "../../public/Login.json"
+import axios from "axios";
 
 const Login = () => {
   const { signInUser, googleSignin } = useAuth();
@@ -31,14 +32,32 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+    const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await googleSignin();
+      const result = await googleSignin();
+      const user = result.user;
+
+  
+
+      const saveUser = {
+        name: user.displayName || "No Name",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        role: "user", // default role
+        isPremium: false, // free plan by default
+        createdAt: new Date(),
+      };
+
+      await axios.post(`${import.meta.env.VITE_ApiCall}/register`, saveUser);
+
       toast.success("Logged in with Google!");
       navigate(from, { replace: true });
-    } catch (error) {
-      toast.error(error.message || "Google login failed.");
+    } catch (err) {
+      console.error("Google Sign-In error:", err);
+      toast.error(
+        err?.response?.data?.message || err.message || "Login failed"
+      );
     } finally {
       setLoading(false);
     }

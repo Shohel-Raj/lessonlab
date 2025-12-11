@@ -4,8 +4,8 @@ import { useAuth } from "../Context/useAuth";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Lottie from "lottie-react";
-import ImgLottie from "../../public/register.json"
-
+import ImgLottie from "../../public/register.json";
+import axios from "axios";
 
 const Register = () => {
   const { createUser, updateUserProfile, googleSignin } = useAuth();
@@ -41,26 +41,68 @@ const Register = () => {
     if (!validatePassword(password)) return;
 
     setLoading(true);
-    try {
-      const result = await createUser(email, password);
-      await updateUserProfile({ displayName: name, photoURL });
-      toast.success("Registration successful!");
-      navigate(from, { replace: true });
-    } catch (err) {
-      toast.error(err.message || "Failed to create account.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    createUser(email, password)
+      .then(async (result) => {
+        try {
+          setLoading(true);
 
+          // 1) UPDATE FIREBASE PROFILE
+          await updateUserProfile({
+            displayName: name,
+            photoURL: photoURL,
+          });
+
+          // 3) SAVE USER IN YOUR BACKEND
+          await axios.post(`${import.meta.env.VITE_ApiCall}/register`, {
+            name,
+            email,
+            photoURL,
+            role: "user",
+            isPremium: false,
+            createdAt: new Date(),
+          });
+
+          toast.success("Account created successfully ");
+          setLoading(false);
+
+          navigate(from, { replace: true });
+        } catch (error) {
+          console.error("Registration error:", error);
+          toast.error(error?.response?.data?.message || "Registration failed!");
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        toast.error("Error: " + error.code);
+        setLoading(false);
+      });
+  };
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await googleSignin();
+      const result = await googleSignin();
+      const user = result.user;
+
+  
+
+      const saveUser = {
+        name: user.displayName || "No Name",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        role: "user", // default role
+        isPremium: false, // free plan by default
+        createdAt: new Date(),
+      };
+
+      await axios.post(`${import.meta.env.VITE_ApiCall}/register`, saveUser);
+
       toast.success("Logged in with Google!");
       navigate(from, { replace: true });
     } catch (err) {
-      toast.error(err.message);
+      console.error("Google Sign-In error:", err);
+      toast.error(
+        err?.response?.data?.message || err.message || "Login failed"
+      );
     } finally {
       setLoading(false);
     }
