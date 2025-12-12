@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import LessonInfoSection from "../Components/LifeLessonDetails/LessonInfoSection";
 import SimilarLessons from "../Components/LifeLessonDetails/SimilarLessons";
 import CommentSection from "../Components/LifeLessonDetails/CommentSection";
@@ -8,42 +8,57 @@ import CreatorCard from "../Components/LifeLessonDetails/CreatorCard";
 import LessonMetadata from "../Components/LifeLessonDetails/LessonMetadata";
 import InteractionButtons from "../Components/LifeLessonDetails/InteractionButtons";
 import Wraper from "../Components/Wraper";
+import axios from "axios";
+import { toast } from "react-toastify";
+import LoaderSpainer from "../Components/Loader/LoaderSpainer";
+import { useAuth } from "../Context/useAuth";
+import { UserUtils } from "../Utils/UserUtils";
 
-// Fake lesson for demo
-const fakeLesson = {
-  _id: "1",
-  title: "Growth Begins With Self-Awareness",
-  description:
-    "A powerful story about understanding yourself, reflecting on mistakes, and embracing growth.",
-  category: "Personal Growth",
-  emotionalTone: "Motivational",
-  accessLevel: "premium", // free | premium
-  image:
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
-  createdAt: "2025-12-01",
-  updatedAt: "2025-12-08",
-  creator: {
-    name: "Ariana Gomez",
-    photoURL: "https://i.pravatar.cc/150?img=47",
-    totalLessons: 12,
-  },
-  likesCount: 1200,
-  favoritesCount: 342,
-  likes: [],
-  isLiked: false,
-  isSaved: false,
-};
 
-const LifeLessonDetailsPage = ({ user, isPremiumUser }) => {
+const LifeLessonDetailsPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [lesson, setLesson] = useState();
+  const [fetching, setFetching] = useState(false);
+  const { user } = useAuth();
+  const [loggedUser, setLoggedUser] = useState(null);
 
-  const [lesson, setLesson] = useState(fakeLesson);
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken(); // get Firebase token
+        const data = await UserUtils.getCurrentUser(token); // fetch user from backend
+        setLoggedUser(data);
+      } catch (err) {
+        console.error("Error fetching logged user:", err);
+      }
+    };
+
+    fetchUser();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        setFetching(true);
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_ApiCall}/lesson/${id}`
+        );
+        setLesson(data.lesson);
+      } catch (err) {
+        toast.error("Failed to load lesson");
+      } finally {
+        setFetching(false);
+      }
+    };
+    fetchLesson();
+  }, [id]);
 
   // Check premium access
-  const showUpgradeBanner = lesson.accessLevel === "premium" && !isPremiumUser;
-  console.log(showUpgradeBanner);
+  const showUpgradeBanner = lesson?.accessLevel === "premium" && !loggedUser.isPremium;
 
-  if (!showUpgradeBanner) {
+  if (showUpgradeBanner) {
     return (
       <div className="container mx-auto p-12 text-center">
         <h1 className="text-4xl font-bold mb-4">Premium Lesson</h1>
@@ -64,6 +79,8 @@ const LifeLessonDetailsPage = ({ user, isPremiumUser }) => {
     );
   }
 
+  if (fetching || !lesson) return <LoaderSpainer />;
+
   return (
     <div className="container mx-auto  space-y-8">
       <div>
@@ -73,7 +90,7 @@ const LifeLessonDetailsPage = ({ user, isPremiumUser }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
           <LessonMetadata lesson={lesson} />
           <StatsEngagement lesson={lesson} />
-          <CreatorCard creator={lesson.creator} />
+          <CreatorCard creator={lesson} />
         </div>
         <div className="flex flex-wrap justify-center gap-4 mt-4 max-w-full">
           <InteractionButtons
@@ -83,7 +100,7 @@ const LifeLessonDetailsPage = ({ user, isPremiumUser }) => {
           />
         </div>
       </Wraper>
-      <div className="mt-20 bg-gray-100 dark:bg-gray-900 py-5" >
+      <div className="mt-20 bg-gray-100 dark:bg-gray-900 py-5">
         <Wraper>
           <CommentSection lessonId={lesson._id} user={user} />
         </Wraper>

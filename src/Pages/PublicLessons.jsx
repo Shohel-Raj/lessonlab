@@ -3,22 +3,7 @@ import LessonCard from "../Components/LessonCard";
 import LoaderSpainer from "../Components/Loader/LoaderSpainer";
 import { toast } from "react-toastify";
 import Wraper from "../Components/Wraper";
-
-const fakePublicLessons = Array.from({ length: 25 }).map((_, i) => ({
-  _id: i + 1,
-  title: `Life Lesson ${i + 1}`,
-  description: "A short description about this lesson to give a preview.",
-  category: ["Personal Growth", "Mindset", "Career", "Life Skills"][i % 4],
-  emotionalTone: ["Motivational", "Inspirational", "Reflective"][i % 3],
-  accessLevel: i % 2 === 0 ? "premium" : "free",
-  createdAt: `2025-12-${(i % 30) + 1}`,
-  creator: {
-    name: ["Ariana Gomez", "John Doe", "Sophia Lee", "Michael Brown"][i % 4],
-    photoURL: `https://i.pravatar.cc/150?img=${i + 1}`,
-  },
-  image:
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
-}));
+import axios from "axios";
 
 const PublicLessons = () => {
   const [lessons, setLessons] = useState([]);
@@ -26,64 +11,39 @@ const PublicLessons = () => {
   const [category, setCategory] = useState("");
   const [tone, setTone] = useState("");
   const [sort, setSort] = useState("");
-  const [fetching, setFetching] = useState(false);
+
+  const [fetching, setFetching] = useState(true);
 
   // Pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 8;
 
-  // -----------------------------
-  // API fetch logic (commented for now)
-  // useEffect(() => {
-  //   let url = new URL(`${import.meta.env.VITE_ApiCall}/public-lessons`);
-  //   url.searchParams.append("page", page);
-  //   url.searchParams.append("pageSize", pageSize);
-  //   if (search) url.searchParams.append("search", search);
-  //   if (category) url.searchParams.append("category", category);
-  //   if (tone) url.searchParams.append("tone", tone);
-  //   if (sort) url.searchParams.append("sort", sort);
-  //
-  //   setFetching(true);
-  //   fetch(url)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setLessons(data.lessons);
-  //       setTotalPages(data.totalPages);
-  //       setFetching(false);
-  //     })
-  //     .catch((err) => {
-  //       toast.error(`Error: ${err.message}`);
-  //       setFetching(false);
-  //     });
-  // }, [search, category, tone, sort, page]);
-  // -----------------------------
-
-  // For demo with fake data
   useEffect(() => {
-    setFetching(true);
-    let filtered = fakePublicLessons.filter((lesson) => {
-      return (
-        lesson.title.toLowerCase().includes(search.toLowerCase()) &&
-        (category ? lesson.category === category : true) &&
-        (tone ? lesson.emotionalTone === tone : true)
-      );
-    });
+    const fetchLessons = async () => {
+      try {
+        setFetching(true);
 
-    if (sort === "newest") {
-      filtered = filtered.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-    } else if (sort === "mostSaved") {
-      // Fake logic: just reverse for demo
-      filtered = filtered.reverse();
-    }
+        let url = new URL(`${import.meta.env.VITE_ApiCall}/publicLesson`);
+        url.searchParams.append("page", page);
+        url.searchParams.append("pageSize", pageSize);
+        if (search) url.searchParams.append("search", search);
+        if (category) url.searchParams.append("category", category);
+        if (tone) url.searchParams.append("tone", tone);
+        if (sort) url.searchParams.append("sort", sort);
 
-    const start = (page - 1) * pageSize;
-    const paginated = filtered.slice(start, start + pageSize);
-    setLessons(paginated);
-    setTotalPages(Math.ceil(filtered.length / pageSize));
-    setFetching(false);
+        const { data } = await axios.get(url);
+
+        setLessons(data?.resut || []);
+        setTotalPages(data?.totalPages || 1);
+      } catch (err) {
+        toast.error(`Failed to load lessons`);
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchLessons();
   }, [search, category, tone, sort, page]);
 
   if (fetching) return <LoaderSpainer />;
@@ -98,23 +58,30 @@ const PublicLessons = () => {
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Explore lessons shared publicly by our community. Filter, sort, and
-            search to discover the wisdom you need.
+            search to discover wisdom.
           </p>
         </div>
 
-        {/* Search, Filter & Sort */}
+        {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 justify-between mb-8">
+
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
             placeholder="Search by title or keyword"
             className="input w-full md:w-1/3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"
           />
 
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setCategory(e.target.value);
+            }}
             className="select w-full md:w-1/4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"
           >
             <option value="">All Categories</option>
@@ -126,7 +93,10 @@ const PublicLessons = () => {
 
           <select
             value={tone}
-            onChange={(e) => setTone(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setTone(e.target.value);
+            }}
             className="select w-full md:w-1/4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"
           >
             <option value="">All Emotional Tones</option>
@@ -137,7 +107,10 @@ const PublicLessons = () => {
 
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value)}
+            onChange={(e) => {
+              setPage(1);
+              setSort(e.target.value);
+            }}
             className="select w-full md:w-1/4 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"
           >
             <option value="">Sort by</option>
@@ -148,16 +121,13 @@ const PublicLessons = () => {
 
         {/* Lessons Grid */}
         {lessons.length === 0 ? (
-          <p>No public lessons found.</p>
+          <p className="text-center text-gray-600 dark:text-gray-300">
+            No public lessons found.
+          </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {lessons.map((lesson) => (
-              <LessonCard
-                key={lesson._id}
-                lesson={lesson}
-                isLiked={false}
-                isSaved={false}
-              />
+              <LessonCard key={lesson._id} lesson={lesson} />
             ))}
           </div>
         )}
@@ -169,7 +139,7 @@ const PublicLessons = () => {
               <button
                 key={i}
                 onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 rounded ${
+                className={`px-4 py-2 rounded-lg transition ${
                   page === i + 1
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 dark:bg-gray-700 dark:text-gray-200"

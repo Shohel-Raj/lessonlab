@@ -3,6 +3,7 @@ import { FiHeart, FiBookmark, FiEye } from "react-icons/fi";
 
 const StatsEngagement = ({ lesson }) => {
   const views = Math.floor(Math.random() * 10000);
+  // const li
 
   return (
     <div className="p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all duration-300 space-y-4">
@@ -18,7 +19,7 @@ const StatsEngagement = ({ lesson }) => {
           <FiHeart className="text-red-500 text-xl" />
           <span>
             <strong className="text-gray-900 dark:text-white">
-              {lesson.likesCount.toLocaleString()}
+              {lesson.likesCount||0}
             </strong>{" "}
             Likes
           </span>
@@ -29,7 +30,7 @@ const StatsEngagement = ({ lesson }) => {
           <FiBookmark className="text-yellow-500 text-xl" />
           <span>
             <strong className="text-gray-900 dark:text-white">
-              {lesson.favoritesCount.toLocaleString()}
+              {lesson.saveCount|| 0}
             </strong>{" "}
             Favorites
           </span>

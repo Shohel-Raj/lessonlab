@@ -8,24 +8,9 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router";
 
-// ❗ Fake Data (Replace with API later)
-const fakeLesson = {
-  title: "Growth Begins With Self‑Awareness",
-  description:
-    "A powerful reminder that understanding yourself is the first step toward intentional living and mindful decision‑making.",
-  category: "Personal Growth",
-  emotionalTone: "Motivational",
-  accessLevel: "premium", // free | premium
-  image:
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
-  creator: {
-    name: "Ariana Gomez",
-    photoURL: "https://i.pravatar.cc/150?img=47",
-  },
-};
 
 const LessonCard = ({
-  lesson = fakeLesson,
+  lesson,
   isPremiumUser = true,
   isLiked = false,
   isSaved = false,
@@ -48,7 +33,7 @@ const LessonCard = ({
     if (showLocked) {
       navigate("/taka"); // route for upgrade
     } else {
-      navigate(`/lisson/${1}`); // route for normal view
+      navigate(`/lisson/${lesson._id}`); // route for normal view
     }
   };
 

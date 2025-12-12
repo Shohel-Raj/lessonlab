@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { useAuth } from "../../../Context/useAuth";
+import LoaderSpainer from "../../../Components/Loader/LoaderSpainer";
 // import UpdateLessonModal from "../../Components/UpdateLessonModal"; // modal for update
 
 const MyLessons = () => {
@@ -11,97 +12,63 @@ const MyLessons = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLesson, setSelectedLesson] = useState(null);
 
-//   useEffect(() => {
-//     if (user?._id) fetchLessons();
-//   }, [user]);
-
-//   const fetchLessons = async () => {
-//     try {
-//       setLoading(true);
-//       const res = await axios.get(`/api/lessons/user/${user._id}`);
-//       setLessons(res.data);
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Failed to fetch lessons");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleDelete = async (lessonId) => {
-//     const confirm = window.confirm("Are you sure you want to delete this lesson?");
-//     if (!confirm) return;
-
-//     try {
-//       await axios.delete(`/api/lessons/${lessonId}`);
-//       toast.success("Lesson deleted successfully!");
-//       setLessons(lessons.filter((lesson) => lesson._id !== lessonId));
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Failed to delete lesson");
-//     }
-//   };
 useEffect(() => {
-    if (user?._id) {
-      fetchLessons();
-    }
-  }, [user]);
+  if (!user) return;
 
-  // Fake data generator
+
   const fetchLessons = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // Replace this with real API call when ready
-    const fakeData = [
-      {
-        _id: "1",
-        title: "How to Stay Motivated",
-        category: "Personal Growth",
-        emotionalTone: "Motivational",
-        visibility: "Public",
-        accessLevel: "Free",
-        createdAt: new Date(),
-        likes: ["user1", "user2"],
-        favorites: ["user3"],
-      },
-      {
-        _id: "2",
-        title: "Career Mistakes I Learned From",
-        category: "Career",
-        emotionalTone: "Realization",
-        visibility: "Private",
-        accessLevel: "Premium",
-        createdAt: new Date(),
-        likes: ["user2"],
-        favorites: [],
-      },
-      {
-        _id: "3",
-        title: "Importance of Gratitude",
-        category: "Mindset",
-        emotionalTone: "Gratitude",
-        visibility: "Public",
-        accessLevel: "Free",
-        createdAt: new Date(),
-        likes: [],
-        favorites: ["user1"],
-      },
-    ];
+      const token = await user.getIdToken();
 
-    // Simulate network delay
-    setTimeout(() => {
-      setLessons(fakeData);
+      const res = await axios.get(`${import.meta.env.VITE_ApiCall}/lessons`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setLessons(res.data.lessons);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch lessons");
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
+
+  fetchLessons();
+}, [user]);
+
+if(loading){
+  return <LoaderSpainer/>
+}
+  //   const handleDelete = async (lessonId) => {
+  //     const confirm = window.confirm("Are you sure you want to delete this lesson?");
+  //     if (!confirm) return;
+
+  //     try {
+  //       await axios.delete(`/api/lessons/${lessonId}`);
+  //       toast.success("Lesson deleted successfully!");
+  //       setLessons(lessons.filter((lesson) => lesson._id !== lessonId));
+  //     } catch (err) {
+  //       console.error(err);
+  //       toast.error("Failed to delete lesson");
+  //     }
+  //   };
+
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">My Lessons</h2>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+        My Lessons
+      </h2>
 
       {loading ? (
         <p className="text-gray-500 dark:text-gray-300">Loading...</p>
       ) : lessons.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-300">You have not added any lessons yet.</p>
+        <p className="text-gray-500 dark:text-gray-300">
+          You have not added any lessons yet.
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="table w-full bg-base-100 dark:bg-gray-800">

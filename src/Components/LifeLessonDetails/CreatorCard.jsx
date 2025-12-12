@@ -19,8 +19,8 @@ const CreatorCard = ({ creator }) => {
         {/* Avatar */}
         <div className="relative">
           <img
-            src={creator.photoURL}
-            alt={creator.name}
+            src={creator.author_photo}
+            alt={creator.author_name}
             className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-300 dark:ring-gray-600"
           />
         </div>
@@ -28,7 +28,7 @@ const CreatorCard = ({ creator }) => {
         {/* Creator Info */}
         <div className="flex flex-col">
           <h4 className="text-xl font-bold text-gray-900 dark:text-white">
-            {creator.name}
+            {creator.author_name}
           </h4>
 
           <p className="text-sm text-gray-600 dark:text-gray-300">

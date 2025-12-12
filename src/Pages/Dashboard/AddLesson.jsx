@@ -28,7 +28,8 @@ const AddLesson = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !description) return toast.error("Title and description are required");
+    if (!title || !description)
+      return toast.error("Title and description are required");
 
     const lessonData = {
       title,
@@ -38,27 +39,32 @@ const AddLesson = () => {
       visibility,
       accessLevel,
       userId: user._id,
-      image: imageUrl || null,
+      image: imageUrl || import.meta.env.VITE_lessonPhoto,
+      author_photo: user.photoURL,
+      author_name: user.displayName,
+      author_email: user.email,
+      created_at: new Date(),
+      updated_at: new Date(),
     };
 
     try {
       setSubmitting(true);
-       axios
-      .post(`${import.meta.env.VITE_ApiCall}/addlesson`, lessonData, {
-        // headers: {
-        //   Authorization: `Bearer ${token}`,
-        // },
-      })
-      .then((res) => {
-        console.log(res)
-        // if (res.data.insertedId) {
-        //   toast.success('Lesson Successfully added');
-        //   e.target.reset();
-        // }
-      })
-      .catch((error) => {
-        toast.error(`${error.message} found`);
-      });
+      axios
+        .post(`${import.meta.env.VITE_ApiCall}/addlesson`, lessonData, {
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
+        })
+        .then((res) => {
+          console.log(res);
+          // if (res.data.insertedId) {
+          //   toast.success('Lesson Successfully added');
+          //   e.target.reset();
+          // }
+        })
+        .catch((error) => {
+          toast.error(`${error.message} found`);
+        });
 
       setTitle("");
       setDescription("");
@@ -77,7 +83,6 @@ const AddLesson = () => {
 
   return (
     <div className="relative max-w-2xl mx-auto p-8 rounded-xl shadow-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-
       {/* Animated objects outside the form */}
       <FiStar className="absolute top-6 left-8 text-gray-300 dark:text-gray-700 text-3xl animate-bounce-slow opacity-30" />
       <FiHeart className="absolute top-20 right-10 text-gray-300 dark:text-gray-700 text-4xl animate-bounce-slower opacity-25" />
@@ -88,10 +93,14 @@ const AddLesson = () => {
       <FaIdBadge className="absolute bottom-10 left-6 text-gray-300 dark:text-gray-700 text-2xl animate-bounce-slow opacity-20" />
       <FiStar className="absolute bottom-10 left-8 text-gray-300 dark:text-gray-700 text-2xl animate-bounce-slow opacity-20" />
 
-      <h2 className="text-2xl font-semibold mb-6 text-center">Add New Lesson</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-center">
+        Add New Lesson
+      </h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
-
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 relative z-10"
+      >
         <input
           type="text"
           placeholder="Lesson Title"
@@ -157,7 +166,11 @@ const AddLesson = () => {
               user?.isPremium ? "" : "opacity-50 cursor-not-allowed"
             }`}
             disabled={!user?.isPremium}
-            title={!user?.isPremium ? "Upgrade to Premium to create Premium lessons" : ""}
+            title={
+              !user?.isPremium
+                ? "Upgrade to Premium to create Premium lessons"
+                : ""
+            }
           >
             <option>Free</option>
             <option>Premium</option>
