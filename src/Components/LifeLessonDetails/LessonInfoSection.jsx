@@ -16,7 +16,7 @@ const LessonInfoSection = ({ lesson }) => {
           {/* Author & Date */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between text-sm text-gray-500 dark:text-gray-400 gap-2">
             <span>By {author_name || "Unknown Author"}</span>
-            <span>{new Date(lesson.createdAt).toLocaleDateString()}</span>
+            <span>{new Date(lesson.created_at).toLocaleDateString()}</span>
           </div>
 
           {/* Title */}

@@ -1,25 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import LessonCard from "../LessonCard";
-
-// Fake lessons for similar recommendations
-const fakeSimilarLessons = Array.from({ length: 6 }).map((_, i) => ({
-  _id: i + 10,
-  title: `Similar Lesson ${i + 1}`,
-  description: "Short preview of the lesson.",
-  category: "Personal Growth",
-  emotionalTone: "Motivational",
-  accessLevel: i % 2 === 0 ? "premium" : "free",
-  image:
-    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
-  creator: { name: "John Doe", photoURL: "https://i.pravatar.cc/150?img=32" },
-}));
+import LoaderSpainer from "../Loader/LoaderSpainer";
 
 const SimilarLessons = ({ currentLesson }) => {
-  const filtered = fakeSimilarLessons.filter(
-    (l) =>
-      l.category === currentLesson.category ||
-      l.emotionalTone === currentLesson.emotionalTone
-  );
+  const [similarLessons, setSimilarLessons] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!currentLesson) return;
+
+    const fetchSimilarLessons = async () => {
+      try {
+        setLoading(true);
+        // Fetch lessons with same category or emotionalTone, exclude current lesson
+        const res = await axios.get(
+          `${import.meta.env.VITE_ApiCall}/lessons/similar/${currentLesson._id}`
+        );
+console.log(res)
+        // Limit to 6 lessons
+        setSimilarLessons(res.data.slice(0, 6));
+      } catch (error) {
+        console.error("Failed to fetch similar lessons:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSimilarLessons();
+  }, [currentLesson]);
+
+  if (loading) return <LoaderSpainer />;
+
+  if (!similarLessons || similarLessons.length === 0)
+    return (
+      <p className="text-center text-gray-500 dark:text-gray-400 mt-10">
+        No similar lessons found.
+      </p>
+    );
 
   return (
     <div className="mt-20">
@@ -30,23 +48,17 @@ const SimilarLessons = ({ currentLesson }) => {
 
       {/* Subheading */}
       <p className="text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto text-center">
-        Explore more lessons that match your interests, emotions, and personal
-        growth journey. These recommendations are curated based on your current
-        lesson.
+        Explore more lessons that match your interests, emotions, and personal growth journey.
       </p>
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filtered.map((lesson) => (
+        {similarLessons.map((lesson) => (
           <div
             key={lesson._id}
             className="transform transition-all hover:-translate-y-2 hover:shadow-xl duration-300"
           >
-            <LessonCard
-              lesson={lesson}
-              isLiked={false}
-              isSaved={false}
-            />
+            <LessonCard lesson={lesson} isLiked={false} isSaved={false} />
           </div>
         ))}
       </div>

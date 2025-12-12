@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaLock,
   FaHeart,
@@ -7,27 +7,107 @@ import {
   FaRegBookmark,
 } from "react-icons/fa";
 import { useNavigate } from "react-router";
+import { useAuth } from "../Context/useAuth";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { UserUtils } from "../Utils/UserUtils";
+import LoaderSpainer from "./Loader/LoaderSpainer";
 
-
-const LessonCard = ({
-  lesson,
-  isPremiumUser = true,
-  isLiked = false,
-  isSaved = false,
-}) => {
-  const { title, description, category, emotionalTone, creator, accessLevel, image } = lesson;
+const LessonCard = ({ lesson,isPremiumUser=true }) => {
+  const {
+    title,
+    description,
+    category,
+    emotionalTone,
+    creator,
+    accessLevel,
+    image,
+  } = lesson;
   const navigate = useNavigate();
-  const showLocked = accessLevel === "premium" && !isPremiumUser;
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const { loading, user } = useAuth();
+    const [loggedUser, setLoggedUser] = useState(null);
+  
+    useEffect(() => {
+      const fetchUser = async () => {
+        if (!user) return;
+        try {
+          const token = await user.getIdToken(); // get Firebase token
+          const data = await UserUtils.getCurrentUser(token); // fetch user from backend
+          setLoggedUser(data);
+        } catch (err) {
+          console.error("Error fetching logged user:", err);
+        }
+      };
+  
+      fetchUser();
+    }, [user]);
 
-  const handleLike = () => {
-    console.log("Like clicked");
-    // Add your logic here
+  const userEmail = user?.email;
+
+  // LIKE STATUS
+  useEffect(() => {
+    if (!lesson || !userEmail) return;
+    setIsLiked(lesson.isLiked?.includes(userEmail));
+  }, [lesson, userEmail]);
+
+  // SAVE STATUS
+  useEffect(() => {
+    if (!lesson || !userEmail) return;
+    setIsSaved(lesson.isSaved?.includes(userEmail));
+  }, [lesson, userEmail]);
+
+  // ----------------- LIKE -----------------
+  const handleLike = async () => {
+    if (!user) return toast.info("Please log in to like");
+
+    try {
+      const token = await user.getIdToken();
+      const res = await axios.put(
+        `${import.meta.env.VITE_ApiCall}/like/${lesson._id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Liked Successfully");
+    
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update like");
+    }
   };
 
-  const handleSave = () => {
-    console.log("Save clicked");
-    // Add your logic here
+  // ----------------- SAVE -----------------
+  const handleSave = async () => {
+    if (!user) return toast.info("Please log in to save");
+
+    try {
+      const token = await user.getIdToken();
+      const res = await axios.put(
+        `${import.meta.env.VITE_ApiCall}/save/${lesson._id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Lesson added to Favourites");
+
+      
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update save");
+    }
   };
+  const showLocked =accessLevel?.toLowerCase() ===  "premium"  && !loggedUser?.isPremiumUser;
+  console.log(showLocked)
+
+  // const handleLike = () => {
+  //   console.log("Like clicked");
+  //   // Add your logic here
+  // };
+
+  // const handleSave = () => {
+  //   console.log("Save clicked");
+  //   // Add your logic here
+  // };
 
   const handleViewDetails = () => {
     if (showLocked) {
@@ -36,6 +116,9 @@ const LessonCard = ({
       navigate(`/lisson/${lesson._id}`); // route for normal view
     }
   };
+  if(loading){
+    return <LoaderSpainer/>
+  }
 
   return (
     <div className="card bg-base-100 shadow-xl rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-gray-800 dark:text-gray-100">

@@ -17,7 +17,7 @@ const LessonMetadata = ({ lesson }) => {
           <span>
             Created:{" "}
             <strong className="text-gray-900 dark:text-white">
-              {new Date(lesson.createdAt).toLocaleDateString()}
+              {new Date(lesson.created_at).toLocaleDateString()}
             </strong>
           </span>
         </div>
@@ -28,7 +28,7 @@ const LessonMetadata = ({ lesson }) => {
           <span>
             Updated:{" "}
             <strong className="text-gray-900 dark:text-white">
-              {new Date(lesson.updatedAt).toLocaleDateString()}
+              {new Date(lesson.updated_at).toLocaleDateString()}
             </strong>
           </span>
         </div>
@@ -38,7 +38,7 @@ const LessonMetadata = ({ lesson }) => {
           <FiEye className="text-gray-400 dark:text-gray-500 text-lg" />
           <span>
             Visibility:{" "}
-            <strong className="text-gray-900 dark:text-white">Public</strong>
+            <strong className="text-gray-900 dark:text-white">{lesson.visibility}</strong>
           </span>
         </div>
 

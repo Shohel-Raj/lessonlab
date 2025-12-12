@@ -1,17 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "../../Context/useAuth";
 import LoaderSpainer from "../Loader/LoaderSpainer";
 
 const CommentSection = ({ lessonId }) => {
-    const { loading, user,  } = useAuth();
-  
-  const [comments, setComments] = useState([
-    { id: 1, user: "John Doe", text: "Amazing lesson!", time: "2h ago" },
-    { id: 2, user: "Sophia Lee", text: "Very insightful!", time: "1h ago" },
-  ]);
+  const { loading, user } = useAuth();
 
+  const [comments, setComments] = useState([]);
+  const [fetching, setFetching] = useState(true);
   const [commentText, setCommentText] = useState("");
+
   const commentEndRef = useRef();
 
   // Auto-scroll to latest comment
@@ -19,25 +18,48 @@ const CommentSection = ({ lessonId }) => {
     commentEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [comments]);
 
-  const handlePostComment = async () => {
-    if (!user) return toast.info("Please log in to comment");
-    if (!commentText.trim()) return;
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_ApiCall}/comments/${lessonId}`);
 
-    // Fake API call simulation
-    const newComment = {
-      id: comments.length + 1,
-      user: user.name,
-      text: commentText,
-      time: "Just now",
+        // Make sure it's an array
+        setComments(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load comments");
+      } finally {
+        setFetching(false);
+      }
     };
 
-    setComments([...comments, newComment]);
-    setCommentText("");
+    fetchComments();
+  }, [lessonId]);
 
+ const handlePostComment = async () => {
+  if (!user) return toast.info("Please log in to comment");
+  if (!commentText.trim()) return;
+
+  try {
+    const token = await user.getIdToken();
+    const res = await axios.post(
+      `${import.meta.env.VITE_ApiCall}/comments/${lessonId}`,
+      { text: commentText }, 
+      { headers: { Authorization: `Bearer ${token}` } } 
+    );
+
+    // Append new comment safely
+    setComments((prev) => [...prev, res.data]);
+    setCommentText("");
     toast.success("Comment posted!");
-  };
-  if(loading){
-    return <LoaderSpainer/>
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to post comment");
+  }
+};
+
+  if (loading || fetching) {
+    return <LoaderSpainer />;
   }
 
   return (
@@ -49,26 +71,40 @@ const CommentSection = ({ lessonId }) => {
 
       {/* Comments List */}
       <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-        {comments.map((c) => (
-          <div
-            key={c.id}
-            className="flex gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 transition hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-              {c.user.charAt(0)}
-            </div>
+        {/* If no comments */}
+        {comments.length === 0 && (
+          <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-5">
+            No comments yet. Be the first to comment!
+          </p>
+        )}
 
-            {/* Comment Content */}
-            <div className="flex-1">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium dark:text-gray-100">{c.user}</span>
-                <span className="text-gray-400 text-xs">{c.time}</span>
+        {/* Render comments */}
+        {Array.isArray(comments) &&
+          comments.length > 0 &&
+          comments?.map((c) => (
+            <div
+              key={c._id}
+              className="flex gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            >
+              {/* Avatar */}
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                {c.userName?.charAt(0)}
               </div>
-              <p className="text-gray-700 dark:text-gray-300">{c.text}</p>
+
+              {/* Comment Content */}
+              <div className="flex-1">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium dark:text-gray-100">
+                    {c.userName}
+                  </span>
+                  <span className="text-gray-400 text-xs">
+                    {c.time || "Just now"}
+                  </span>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300">{c.text}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
         <div ref={commentEndRef}></div>
       </div>
