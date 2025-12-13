@@ -11,6 +11,7 @@ import DashboardHome from "../Pages/Dashboard/DashboardHome";
 import Profile from "../Pages/Profile";
 import AddLesson from "../Pages/Dashboard/AddLesson";
 import MyLessons from "../Pages/Dashboard/user/MyLesson";
+import Favorites from "../Pages/Dashboard/user/Favorites";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,9 @@ const router = createBrowserRouter([
       },
       {
         path:"my-lessons", Component: MyLessons
+      },
+      {
+        path:"favorites", Component: Favorites
       }
 
     ],

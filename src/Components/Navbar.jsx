@@ -201,13 +201,9 @@ const Navbar = () => {
                     {user.displayName || "User"}
                   </span>
                 </li>
+               
                 <li>
-                  <NavLink to="/dashboard" className="hover:text-primary">
-                    Dashboard
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/profile" className="hover:text-primary">
+                  <NavLink to="/dashboard/profile" className="hover:text-primary">
                     Profile
                   </NavLink>
                 </li>

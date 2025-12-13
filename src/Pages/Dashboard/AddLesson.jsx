@@ -50,17 +50,12 @@ const AddLesson = () => {
     try {
       setSubmitting(true);
       axios
-        .post(`${import.meta.env.VITE_ApiCall}/addlesson`, lessonData, {
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
-        })
+        .post(`${import.meta.env.VITE_ApiCall}/addlesson`, lessonData)
         .then((res) => {
-          console.log(res);
-          // if (res.data.insertedId) {
-          //   toast.success('Lesson Successfully added');
-          //   e.target.reset();
-          // }
+          if (res.data.success) {
+            toast.success('Lesson Successfully added');
+            e.target.reset();
+          }
         })
         .catch((error) => {
           toast.error(`${error.message} found`);

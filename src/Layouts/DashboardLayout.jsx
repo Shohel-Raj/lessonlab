@@ -12,8 +12,9 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../Context/useAuth";
 import LoaderSpainer from "../Components/Loader/LoaderSpainer";
-import { FaArrowAltCircleDown, FaArrowLeft, FaPlus } from "react-icons/fa";
+import {  FaArrowLeft, FaPlus } from "react-icons/fa";
 import { UserUtils } from "../Utils/UserUtils";
+import { ToastContainer } from "react-toastify";
 
 const DashboardLayout = () => {
   const [open, setOpen] = useState(true);
@@ -67,6 +68,7 @@ const DashboardLayout = () => {
           <nav className="flex flex-col gap-3 mt-6">
             <SidebarLink
               to="/dashboard"
+              end={true}
               icon={<FiHome />}
               open={open}
               label="Home"
@@ -161,7 +163,9 @@ const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+       <ToastContainer/>
     </div>
+    
   );
 };
 
@@ -170,9 +174,10 @@ export default DashboardLayout;
 /***************************
  *  SIDEBAR LINK COMPONENT
  ***************************/
-const SidebarLink = ({ to, icon, label, open }) => (
+const SidebarLink = ({ to, icon, label,end=false, open }) => (
   <NavLink
     to={to}
+    end = {end} 
     className={({ isActive }) =>
       `flex items-center gap-3 px-4 py-2 rounded-lg transition 
        ${

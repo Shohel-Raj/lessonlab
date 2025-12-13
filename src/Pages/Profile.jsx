@@ -1,107 +1,152 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { useAuth } from "../Context/useAuth";
 import LessonCard from "../Components/LessonCard";
+import { UserUtils } from "../Utils/UserUtils";
 
 const Profile = () => {
-  const { user, reloadUser } = useAuth(); 
+  const { user, reloadUser } = useAuth();
   const [lessons, setLessons] = useState([]);
-  const [updating, setUpdating] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
+  const [loggedUser, setLoggedUser] = useState(null);
 
   useEffect(() => {
-    if (user?._id) fetchUserLessons();
+    const fetchUser = async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken();
+        const data = await UserUtils.getCurrentUser(token);
+        setLoggedUser(data);
+      } catch (err) {
+        console.error("Error fetching logged user:", err);
+      }
+    };
+
+    fetchUser();
   }, [user]);
 
-  const fetchUserLessons = async () => {
-    try {
-      const res = await axios.get(`/api/lessons/user/${user._id}`);
-      setLessons(res.data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to fetch your lessons");
-    }
-  };
+  useEffect(() => {
+    if (!user) return;
 
-  const handleProfileUpdate = async (e) => {
+    const fetchUserLessons = async () => {
+      try {
+        setLoading(true)
+        const token = await user.getIdToken();
+        const res = await axios.get(`${import.meta.env.VITE_ApiCall}/lessons`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setLessons(res.data.lessons);
+        setLoading(false)
+      } catch {
+        toast.error("Failed to load lessons");
+        setLoading(false)
+      }
+    };
+
+    fetchUserLessons();
+  }, [user]);
+
+  const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      setUpdating(true);
-      await axios.patch(`/api/users/${user._id}`, { name: displayName, photoURL });
-      toast.success("Profile updated successfully!");
-      reloadUser(); // refresh context user
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update profile");
+      setLoading(true);
+      await axios.patch(`/api/users/${user._id}`, {
+        name: displayName,
+        photoURL,
+      });
+      toast.success("Profile updated");
+      reloadUser();
+    } catch {
+      toast.error("Update failed");
     } finally {
-      setUpdating(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-10">
+    <div className="max-w-6xl mx-auto p-6 space-y-10">
+      {/* PROFILE CARD */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border p-6">
         <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="avatar">
-            <div className="w-24 h-24 rounded-full border">
-              <img src={photoURL || "https://i.pravatar.cc/100"} alt="Profile" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{user?.name}</h2>
-            <p className="text-gray-500 dark:text-gray-300">{user?.email}</p>
-            {user?.isPremium && (
-              <span className="inline-block mt-2 px-2 py-1 text-sm bg-yellow-400 text-black rounded">
+          {/* Avatar */}
+          <div className="relative">
+            <img
+              src={photoURL || "https://i.pravatar.cc/150"}
+              alt="Profile"
+              className="w-28 h-28 rounded-full object-cover border"
+            />
+            {loggedUser?.isPremium && (
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs px-2 py-1 rounded-full">
                 Premium ⭐
               </span>
             )}
-            <div className="mt-4">
-              <form onSubmit={handleProfileUpdate} className="flex flex-col gap-3">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="input input-bordered w-full max-w-xs"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Photo URL"
-                  value={photoURL}
-                  onChange={(e) => setPhotoURL(e.target.value)}
-                  className="input input-bordered w-full max-w-xs"
-                />
-                <button
-                  type="submit"
-                  disabled={updating}
-                  className="btn btn-primary mt-2"
-                >
-                  {updating ? "Updating..." : "Update Profile"}
-                </button>
-              </form>
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {user?.displayName}
+            </h2>
+            <p className="text-sm text-gray-500">{user?.email}</p>
+
+            {/* Stats */}
+            <div className="flex justify-center md:justify-start gap-6 mt-4">
+              <Stat label="Lessons Created" value={lessons.length} />
+              <Stat label="Lessons Saved" value={user?.savedCount || 0} />
             </div>
           </div>
+
+          {/* Edit Form */}
+          <form onSubmit={handleUpdate} className="w-full md:w-72 space-y-3">
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Display Name"
+              className="input input-bordered w-full"
+              required
+            />
+            <input
+              type="text"
+              value={photoURL}
+              onChange={(e) => setPhotoURL(e.target.value)}
+              placeholder="Photo URL"
+              className="input input-bordered w-full"
+            />
+            <button disabled={loading} className="btn btn-primary w-full">
+              {loading ? "Updating..." : "Update Profile"}
+            </button>
+          </form>
         </div>
       </div>
 
-      {/* User's Public Lessons */}
-      <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
-        Public Lessons by {user?.displayName}
-      </h3>
-      {lessons.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-300">No lessons created yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {lessons.map((lesson) => (
-            <LessonCard key={lesson._id} lesson={lesson} />
-          ))}
-        </div>
-      )}
+      {/* USER LESSONS */}
+      <div>
+        <h3 className="text-xl font-semibold mb-4">Your Public Lessons</h3>
+
+        {lessons.length === 0 ? (
+          <p className="text-gray-500">No lessons created yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {lessons.map((lesson) => (
+              <LessonCard key={lesson._id} lesson={lesson} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
+
+const Stat = ({ label, value }) => (
+  <div className="text-center">
+    <p className="text-xl font-bold">{value}</p>
+    <p className="text-xs text-gray-500">{label}</p>
+  </div>
+);
 
 export default Profile;

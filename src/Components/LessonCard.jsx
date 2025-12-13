@@ -37,7 +37,7 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
           const data = await UserUtils.getCurrentUser(token); // fetch user from backend
           setLoggedUser(data);
         } catch (err) {
-          console.error("Error fetching logged user:", err);
+          toast.error("Error fetching logged user:", err);
         }
       };
   
@@ -72,7 +72,6 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
       toast.success("Liked Successfully");
     
     } catch (err) {
-      console.error(err);
       toast.error("Failed to update like");
     }
   };
@@ -92,22 +91,12 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
 
       
     } catch (err) {
-      console.error(err);
       toast.error("Failed to update save");
     }
   };
   const showLocked =accessLevel?.toLowerCase() ===  "premium"  && !loggedUser?.isPremiumUser;
-  console.log(showLocked)
 
-  // const handleLike = () => {
-  //   console.log("Like clicked");
-  //   // Add your logic here
-  // };
 
-  // const handleSave = () => {
-  //   console.log("Save clicked");
-  //   // Add your logic here
-  // };
 
   const handleViewDetails = () => {
     if (showLocked) {
@@ -158,14 +147,14 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
 
           <div className="flex items-center gap-3 text-lg">
             <button
-              onClick={handleLike}
+              // onClick={handleLike}
               className="hover:text-red-500 transition"
               aria-label="like"
             >
               {isLiked ? <FaHeart /> : <FaRegHeart />}
             </button>
             <button
-              onClick={handleSave}
+              // onClick={handleSave}
               className="hover:text-yellow-500 transition"
               aria-label="save"
             >
