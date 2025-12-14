@@ -63,7 +63,11 @@ const DashboardLayout = () => {
         className={`
           bg-base-100 shadow-md border-r border-base-300
           w-[260px]
-          ${isMobile ? "fixed z-50 h-full transition-transform duration-300" : "relative"}
+          ${
+            isMobile
+              ? "fixed z-50 h-full transition-transform duration-300"
+              : "relative"
+          }
           ${isMobile && !mobileOpen ? "-translate-x-full" : "translate-x-0"}
         `}
       >
@@ -83,22 +87,98 @@ const DashboardLayout = () => {
 
           {/* MENU */}
           <nav className="flex flex-col gap-3">
-            <SidebarLink to="/dashboard" icon={<FiHome />} label="Home" end isMobile={isMobile} setMobileOpen={setMobileOpen} />
-            <SidebarLink to="/dashboard/profile" icon={<FiUser />} label="My Profile" isMobile={isMobile} setMobileOpen={setMobileOpen} />
-            <SidebarLink to="/dashboard/add-lesson" icon={<FaPlus />} label="Add Lesson" isMobile={isMobile} setMobileOpen={setMobileOpen} />
-            <SidebarLink to="/dashboard/my-lessons" icon={<FiBook />} label="My Lessons" isMobile={isMobile} setMobileOpen={setMobileOpen} />
-            <SidebarLink to="/dashboard/favorites" icon={<FiStar />} label="My Favorites" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+            {loggedUser?.role === "admin" ? (
+              <>
+                <SidebarLink
+                  to="/dashboard/admin"
+                  icon={<FiHome />}
+                  label="Home"
+                  end
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
+              </>
+            ) : (
+              <>
+                <SidebarLink
+                  to="/dashboard"
+                  icon={<FiHome />}
+                  label="Home"
+                  end
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
+              </>
+            )}
+
+            <SidebarLink
+              to="/dashboard/profile"
+              icon={<FiUser />}
+              label="My Profile"
+              isMobile={isMobile}
+              setMobileOpen={setMobileOpen}
+            />
+            <SidebarLink
+              to="/dashboard/add-lesson"
+              icon={<FaPlus />}
+              label="Add Lesson"
+              isMobile={isMobile}
+              setMobileOpen={setMobileOpen}
+            />
+
+            {!loggedUser?.role === "admin" && (
+              <>
+                <SidebarLink
+                  to="/dashboard/my-lessons"
+                  icon={<FiBook />}
+                  label="My Lessons"
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
+                <SidebarLink
+                  to="/dashboard/favorites"
+                  icon={<FiStar />}
+                  label="My Favorites"
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
+              </>
+            )}
 
             {loggedUser?.role === "admin" && (
               <>
-                <SidebarLink to="/dashboard/admin/manage-users" icon={<FiUser />} label="Manage Users" isMobile={isMobile} setMobileOpen={setMobileOpen} />
-                <SidebarLink to="/dashboard/admin/manage-lessons" icon={<FiBook />} label="Manage Lessons" isMobile={isMobile} setMobileOpen={setMobileOpen} />
-                <SidebarLink to="/dashboard/admin/reported-lessons" icon={<FiStar />} label="Reported Lessons" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+                <SidebarLink
+                  to="/dashboard/admin/manage-users"
+                  icon={<FiUser />}
+                  label="Manage Users"
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
+                <SidebarLink
+                  to="/dashboard/admin/manage-lessons"
+                  icon={<FiBook />}
+                  label="Manage Lessons"
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
+                <SidebarLink
+                  to="/dashboard/admin/reported-lessons"
+                  icon={<FiStar />}
+                  label="Reported Lessons"
+                  isMobile={isMobile}
+                  setMobileOpen={setMobileOpen}
+                />
               </>
             )}
 
             <div className="border-t border-base-300 mt-6" />
-            <SidebarLink to="/" icon={<FaArrowLeft />} label="Go Home" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+            <SidebarLink
+              to="/"
+              icon={<FaArrowLeft />}
+              label="Go Home"
+              isMobile={isMobile}
+              setMobileOpen={setMobileOpen}
+            />
           </nav>
         </div>
       </aside>
@@ -117,19 +197,17 @@ const DashboardLayout = () => {
               </button>
             )}
             <p className="text-lg font-semibold">Dashboard</p>
-            
           </div>
 
           <div className="flex-1">
-            <div className="flex items-center justify-end ml-5 gap-4" >
+            <div className="flex items-center justify-end ml-5 gap-4">
               <ThemeToggle />
-            <div className="avatar">
-              <div className="w-10 rounded-full border">
-                <img src={user?.photoURL} alt="user" />
+              <div className="avatar">
+                <div className="w-10 rounded-full border">
+                  <img src={user?.photoURL} alt="user" />
+                </div>
               </div>
             </div>
-            </div>
-            
           </div>
         </div>
 
@@ -148,7 +226,14 @@ export default DashboardLayout;
 /* =============================
    SIDEBAR LINK
 ============================= */
-const SidebarLink = ({ to, icon, label, end = false, isMobile, setMobileOpen }) => (
+const SidebarLink = ({
+  to,
+  icon,
+  label,
+  end = false,
+  isMobile,
+  setMobileOpen,
+}) => (
   <NavLink
     to={to}
     end={end}
