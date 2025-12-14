@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UserUtils } from "../../Utils/UserUtils";
 import { useAuth } from "../../Context/useAuth";
+import DashoardHomeUser from "./user/DashoardHomeUser";
 
 const DashboardHome = () => {
   const { user } = useAuth();
@@ -23,13 +24,8 @@ const DashboardHome = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">Dashboard Home</h2>
-      {loggedUser ? (
-        <div>
-          <p>Welcome, {loggedUser.name}!</p>
-          <p>Email: {loggedUser.email}</p>
-          <p>Role: {loggedUser.role}</p>
-        </div>
+      {loggedUser?.role === "user"  ? (
+        <DashoardHomeUser/>
       ) : (
         <p>Loading user info...</p>
       )}

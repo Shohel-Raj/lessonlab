@@ -6,218 +6,193 @@ import {
   FiHome,
   FiUser,
   FiBook,
-  FiSettings,
   FiStar,
+  FiMoon,
+  FiSun,
 } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "../Context/useAuth";
 import LoaderSpainer from "../Components/Loader/LoaderSpainer";
-import {  FaArrowLeft, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import { UserUtils } from "../Utils/UserUtils";
 import { ToastContainer } from "react-toastify";
 
+/* =============================
+   DASHBOARD LAYOUT
+============================= */
 const DashboardLayout = () => {
-  const [open, setOpen] = useState(true);
   const { loading, user } = useAuth();
   const [loggedUser, setLoggedUser] = useState(null);
-  const sidebarVariants = {
-    open: { width: "260px" },
-    closed: { width: "70px" },
-  };
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  /* Detect screen size */
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!user) return;
-      try {
-        const token = await user.getIdToken(); // get Firebase token
-        const data = await UserUtils.getCurrentUser(token); // fetch user from backend
-        setLoggedUser(data);
-      } catch (err) {
-        console.error("Error fetching logged user:", err);
-      }
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
+  /* Fetch logged user */
+  useEffect(() => {
+    if (!user) return;
+    const fetchUser = async () => {
+      const token = await user.getIdToken();
+      const data = await UserUtils.getCurrentUser(token);
+      setLoggedUser(data);
+    };
     fetchUser();
   }, [user]);
 
-  if (loading) {
-    return <LoaderSpainer />;
-  }
+  if (loading) return <LoaderSpainer />;
 
   return (
-    <div className="min-h-screen flex bg-base-200 transition-all duration-300">
+    <div className="min-h-screen flex bg-base-200">
+      {/* MOBILE OVERLAY */}
+      {isMobile && mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 bg-black/40 z-40"
+        />
+      )}
+
       {/* SIDEBAR */}
-      <motion.aside
-        variants={sidebarVariants}
-        animate={open ? "open" : "closed"}
-        className="bg-base-100 shadow-md border-r border-base-300 relative"
+      <aside
+        className={`
+          bg-base-100 shadow-md border-r border-base-300
+          w-[260px]
+          ${isMobile ? "fixed z-50 h-full transition-transform duration-300" : "relative"}
+          ${isMobile && !mobileOpen ? "-translate-x-full" : "translate-x-0"}
+        `}
       >
-        <div className="py-6 px-2">
-          <div className="text-xl font-bold mb-6 flex flex-col gap-1">
-            {/* Toggle Button */}
-            <button
-              onClick={() => setOpen(!open)}
-              className="absolute  top-5 bg-primary text-white p-2 rounded-full shadow cursor-pointer"
-            >
-              {open ? <FiX size={18} /> : <FiMenu size={18} />}
-            </button>
-            <h1 className="ml-10">{open ? "lessonLab" : "LL"}</h1>
+        <div className="py-6 px-3">
+          {/* LOGO */}
+          <div className="text-xl font-bold mb-6 flex items-center gap-2">
+            {isMobile && (
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="bg-primary text-white p-2 rounded-full"
+              >
+                <FiX size={18} />
+              </button>
+            )}
+            <h1>lessonLab</h1>
           </div>
 
-          {/* MENU LINKS */}
-          <nav className="flex flex-col gap-3 mt-6">
-            <SidebarLink
-              to="/dashboard"
-              end={true}
-              icon={<FiHome />}
-              open={open}
-              label="Home"
-            />
-            <SidebarLink
-              to="/dashboard/profile"
-              icon={<FiUser />}
-              open={open}
-              label="My Profile"
-            />
-            <SidebarLink
-              to="/dashboard/add-lesson"
-              icon={<FaPlus />}
-              open={open}
-              label="Add Lesson"
-            />
-            <SidebarLink
-              to="/dashboard/my-lessons"
-              icon={<FiBook />}
-              open={open}
-              label="My Lessons"
-            />
-            <SidebarLink
-              to="/dashboard/favorites"
-              icon={<FiStar />}
-              open={open}
-              label="Saved Lessons"
-            />
-            <SidebarLink
-              to="/dashboard/settings"
-              icon={<FiSettings />}
-              open={open}
-              label="Settings"
-            />
+          {/* MENU */}
+          <nav className="flex flex-col gap-3">
+            <SidebarLink to="/dashboard" icon={<FiHome />} label="Home" end isMobile={isMobile} setMobileOpen={setMobileOpen} />
+            <SidebarLink to="/dashboard/profile" icon={<FiUser />} label="My Profile" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+            <SidebarLink to="/dashboard/add-lesson" icon={<FaPlus />} label="Add Lesson" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+            <SidebarLink to="/dashboard/my-lessons" icon={<FiBook />} label="My Lessons" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+            <SidebarLink to="/dashboard/favorites" icon={<FiStar />} label="My Favorites" isMobile={isMobile} setMobileOpen={setMobileOpen} />
 
-            {/* Admin-specific links */}
             {loggedUser?.role === "admin" && (
               <>
-               
-                <SidebarLink
-                  to="/dashboard/admin/manage-users"
-                  icon={<FiUser />}
-                  open={open}
-                  label="Manage Users"
-                />
-                <SidebarLink
-                  to="/dashboard/admin/manage-lessons"
-                  icon={<FiBook />}
-                  open={open}
-                  label="Manage Lessons"
-                />
-                <SidebarLink
-                  to="/dashboard/admin/reported-lessons"
-                  icon={<FiStar />}
-                  open={open}
-                  label="Reported Lessons"
-                />
+                <SidebarLink to="/dashboard/admin/manage-users" icon={<FiUser />} label="Manage Users" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+                <SidebarLink to="/dashboard/admin/manage-lessons" icon={<FiBook />} label="Manage Lessons" isMobile={isMobile} setMobileOpen={setMobileOpen} />
+                <SidebarLink to="/dashboard/admin/reported-lessons" icon={<FiStar />} label="Reported Lessons" isMobile={isMobile} setMobileOpen={setMobileOpen} />
               </>
             )}
 
-             <div className="border-t border-base-300 mt-8"></div>{" "}
-                {/* separator */}
-                <SidebarLink
-                  to="/"
-                  icon={<FaArrowLeft />}
-                  open={open}
-                  label="Go Home"
-                />
+            <div className="border-t border-base-300 mt-6" />
+            <SidebarLink to="/" icon={<FaArrowLeft />} label="Go Home" isMobile={isMobile} setMobileOpen={setMobileOpen} />
           </nav>
         </div>
-      </motion.aside>
+      </aside>
 
-      {/* RIGHT MAIN AREA */}
+      {/* MAIN AREA */}
       <div className="flex-1 flex flex-col">
         {/* TOP NAV */}
         <div className="navbar bg-base-100 shadow-sm px-6">
-          <div className="flex-1">
+          <div className="flex-1 flex items-center gap-2">
+            {isMobile && (
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="btn btn-ghost btn-sm"
+              >
+                <FiMenu size={22} />
+              </button>
+            )}
             <p className="text-lg font-semibold">Dashboard</p>
+            
           </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
+
+          <div className="flex-1">
+            <div className="flex items-center justify-end ml-5 gap-4" >
+              <ThemeToggle />
             <div className="avatar">
               <div className="w-10 rounded-full border">
                 <img src={user?.photoURL} alt="user" />
               </div>
             </div>
+            </div>
+            
           </div>
         </div>
 
-        {/* CONTENT */}
         <main className="p-6">
           <Outlet />
         </main>
       </div>
-       <ToastContainer/>
+
+      <ToastContainer />
     </div>
-    
   );
 };
 
 export default DashboardLayout;
 
-/***************************
- *  SIDEBAR LINK COMPONENT
- ***************************/
-const SidebarLink = ({ to, icon, label,end=false, open }) => (
+/* =============================
+   SIDEBAR LINK
+============================= */
+const SidebarLink = ({ to, icon, label, end = false, isMobile, setMobileOpen }) => (
   <NavLink
     to={to}
-    end = {end} 
+    end={end}
+    onClick={() => isMobile && setMobileOpen(false)}
     className={({ isActive }) =>
-      `flex items-center gap-3 px-4 py-2 rounded-lg transition 
-       ${
-         isActive
-           ? "bg-primary/20 text-primary font-semibold"
-           : "hover:bg-base-300"
-       }`
+      `flex items-center gap-3 px-4 py-2 rounded-lg transition
+      ${
+        isActive
+          ? "bg-primary/20 text-primary font-semibold"
+          : "hover:bg-base-300"
+      }`
     }
   >
     <span className="text-xl">{icon}</span>
-
-    <AnimatePresence>
-      {open && (
-        <motion.span
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -10 }}
-          className="whitespace-nowrap"
-        >
-          {label}
-        </motion.span>
-      )}
-    </AnimatePresence>
+    <span>{label}</span>
   </NavLink>
 );
 
-/***************************
- *  THEME TOGGLE
- ***************************/
+/* =============================
+   THEME TOGGLE
+============================= */
 const ThemeToggle = () => {
-  const changeTheme = () => {
-    const html = document.documentElement;
-    const isDark = html.getAttribute("data-theme") === "dark";
-    html.setAttribute("data-theme", isDark ? "light" : "dark");
-    localStorage.setItem("theme", isDark ? "light" : "dark");
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", saved);
+    setTheme(saved);
+  }, []);
+
+  const toggle = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    setTheme(next);
   };
 
   return (
-    <button onClick={changeTheme} className="btn btn-sm btn-primary">
-      Toggle Theme
-    </button>
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      onClick={toggle}
+      className="btn btn-outline"
+    >
+      {theme === "light" ? <FiMoon /> : <FiSun />}
+    </motion.button>
   );
 };

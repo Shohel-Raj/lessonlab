@@ -14,7 +14,6 @@ const MyLessons = () => {
   const [loading, setLoading] = useState(true);
   const [editLesson, setEditLesson] = useState(null);
   const [deleteLesson, setDeleteLesson] = useState(null);
-  console.log(lessons);
 
   const fetchLessons = async () => {
     try {

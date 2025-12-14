@@ -6,13 +6,16 @@ import LessonCard from "../Components/LessonCard";
 import { UserUtils } from "../Utils/UserUtils";
 
 const Profile = () => {
-  const { user, reloadUser } = useAuth();
+  const { user, reloadUser, updateUserProfile } = useAuth();
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
   const [loggedUser, setLoggedUser] = useState(null);
+  const [totalLesson, setTotalLesson] = useState(0);
+
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,16 +37,20 @@ const Profile = () => {
 
     const fetchUserLessons = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const token = await user.getIdToken();
-        const res = await axios.get(`${import.meta.env.VITE_ApiCall}/lessons`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLessons(res.data.lessons);
-        setLoading(false)
+        const res = await axios.get(
+          `${import.meta.env.VITE_ApiCall}/my-public-lessons`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setLessons(res.data.publicLessons);
+        setTotalLesson(res.data.totalLessonsCount);
+        setLoading(false);
       } catch {
         toast.error("Failed to load lessons");
-        setLoading(false)
+        setLoading(false);
       }
     };
 
@@ -54,6 +61,10 @@ const Profile = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      await updateUserProfile({
+        displayName: displayName,
+        photoURL: photoURL,
+      });
       await axios.patch(`/api/users/${user._id}`, {
         name: displayName,
         photoURL,
@@ -95,7 +106,7 @@ const Profile = () => {
 
             {/* Stats */}
             <div className="flex justify-center md:justify-start gap-6 mt-4">
-              <Stat label="Lessons Created" value={lessons.length} />
+              <Stat label="Lessons Created" value={totalLesson} />
               <Stat label="Lessons Saved" value={user?.savedCount || 0} />
             </div>
           </div>
@@ -129,7 +140,7 @@ const Profile = () => {
         <h3 className="text-xl font-semibold mb-4">Your Public Lessons</h3>
 
         {lessons.length === 0 ? (
-          <p className="text-gray-500">No lessons created yet.</p>
+          <p className="text-gray-500">No public lessons created yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {lessons.map((lesson) => (
