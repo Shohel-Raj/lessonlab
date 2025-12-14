@@ -12,6 +12,8 @@ import Profile from "../Pages/Profile";
 import AddLesson from "../Pages/Dashboard/AddLesson";
 import MyLessons from "../Pages/Dashboard/user/MyLesson";
 import Favorites from "../Pages/Dashboard/user/Favorites";
+import DashoardHomeUser from "../Pages/Dashboard/user/DashoardHomeUser";
+import AdminDAshboardHome from "../Pages/Dashboard/AdminDAshboardHome";
 
 const router = createBrowserRouter([
   {
@@ -40,19 +42,24 @@ const router = createBrowserRouter([
     Component: DashboardLayout,
     children: [
       { index: true, Component: DashboardHome },
+      { path: "user", Component: DashoardHomeUser },
+      { path: "admin", Component: AdminDAshboardHome },
       {
-        path:"profile", Component: Profile
+        path: "profile",
+        Component: Profile,
       },
       {
-        path:"add-lesson", Component: AddLesson
+        path: "add-lesson",
+        Component: AddLesson,
       },
       {
-        path:"my-lessons", Component: MyLessons
+        path: "my-lessons",
+        Component: MyLessons,
       },
       {
-        path:"favorites", Component: Favorites
-      }
-
+        path: "favorites",
+        Component: Favorites,
+      },
     ],
   },
 ]);
