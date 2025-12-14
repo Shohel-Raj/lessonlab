@@ -14,8 +14,7 @@ const Profile = () => {
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
   const [loggedUser, setLoggedUser] = useState(null);
   const [totalLesson, setTotalLesson] = useState(0);
-
-
+  const [totalSaved, setTotalSaved] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,8 +52,21 @@ const Profile = () => {
         setLoading(false);
       }
     };
-
+    const resSaved = async () => {
+      try {
+        const token = await user.getIdToken();
+        const fav= await axios.get(`${import.meta.env.VITE_ApiCall}/my-favorites`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTotalSaved(fav.data.data.length)
+      } catch (error) {
+        toast.error("Favourite count fetch fail");
+      }
+    };
+    // setTotalSaved(resSaved.data.data.length || 0);
+    
     fetchUserLessons();
+    resSaved()
   }, [user]);
 
   const handleUpdate = async (e) => {
@@ -107,7 +119,7 @@ const Profile = () => {
             {/* Stats */}
             <div className="flex justify-center md:justify-start gap-6 mt-4">
               <Stat label="Lessons Created" value={totalLesson} />
-              <Stat label="Lessons Saved" value={user?.savedCount || 0} />
+              <Stat label="Lessons Saved" value={totalSaved || 0} />
             </div>
           </div>
 

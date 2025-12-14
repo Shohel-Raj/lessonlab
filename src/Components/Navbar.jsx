@@ -11,7 +11,6 @@ const Navbar = () => {
   const { loading, user, signOutUser } = useAuth();
   const navigate = useNavigate();
 
-  console.log(user);
   // Apply theme
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
