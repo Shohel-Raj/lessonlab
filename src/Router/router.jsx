@@ -18,12 +18,14 @@ import ManageUsers from "../Pages/Dashboard/admin/ManageUsers";
 import ManageLessons from "../Pages/Dashboard/admin/ManageLesson";
 import ReportedLessons from "../Pages/Dashboard/admin/ReportedLessons";
 import ErrorPage from "../Pages/ErrorPage";
+import AdminRoute from "./AdminRoute";
+import ProtectedRouts from "./ProtectedRouts";
 
 const router = createBrowserRouter([
   {
     path: "/",
     Component: MainLayout,
-  errorElement: <ErrorPage/>,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, Component: Home },
       { path: "auth/login", Component: Login },
@@ -44,11 +46,22 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    Component: DashboardLayout,
+    element: (
+      <ProtectedRouts>
+        <DashboardLayout />
+      </ProtectedRouts>
+    ),
     children: [
       { index: true, Component: DashboardHome },
       { path: "user", Component: DashoardHomeUser },
-      { path: "admin", Component: AdminDAshboardHome },
+      {
+        path: "admin",
+        element: (
+          <AdminRoute>
+            <AdminDAshboardHome />
+          </AdminRoute>
+        ),
+      },
       { path: "admin/manage-users", Component: ManageUsers },
       { path: "admin/manage-lessons", Component: ManageLessons },
       { path: "admin/reported-lessons", Component: ReportedLessons },

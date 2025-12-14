@@ -126,7 +126,7 @@ const DashboardLayout = () => {
               setMobileOpen={setMobileOpen}
             />
 
-            {!loggedUser?.role === "admin" && (
+            {!(loggedUser?.role === "admin") && (
               <>
                 <SidebarLink
                   to="/dashboard/my-lessons"
