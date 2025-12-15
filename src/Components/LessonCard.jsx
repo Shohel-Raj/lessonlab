@@ -13,7 +13,7 @@ import axios from "axios";
 import { UserUtils } from "../Utils/UserUtils";
 import LoaderSpainer from "./Loader/LoaderSpainer";
 
-const LessonCard = ({ lesson,isPremiumUser=true }) => {
+const LessonCard = ({ lesson }) => {
   const {
     title,
     description,
@@ -27,22 +27,22 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const { loading, user } = useAuth();
-    const [loggedUser, setLoggedUser] = useState(null);
-  
-    useEffect(() => {
-      const fetchUser = async () => {
-        if (!user) return;
-        try {
-          const token = await user.getIdToken(); // get Firebase token
-          const data = await UserUtils.getCurrentUser(token); // fetch user from backend
-          setLoggedUser(data);
-        } catch (err) {
-          toast.error("Error fetching logged user:", err);
-        }
-      };
-  
-      fetchUser();
-    }, [user]);
+  const [loggedUser, setLoggedUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken(); // get Firebase token
+        const data = await UserUtils.getCurrentUser(token); // fetch user from backend
+        setLoggedUser(data);
+      } catch (err) {
+        toast.error("Error fetching logged user:", err);
+      }
+    };
+
+    fetchUser();
+  }, [user]);
 
   const userEmail = user?.email;
 
@@ -70,7 +70,6 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Liked Successfully");
-    
     } catch (err) {
       toast.error("Failed to update like");
     }
@@ -88,25 +87,23 @@ const LessonCard = ({ lesson,isPremiumUser=true }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Lesson added to Favourites");
-
-      
     } catch (err) {
       toast.error("Failed to update save");
     }
   };
-  const showLocked =accessLevel?.toLowerCase() ===  "premium"  && !loggedUser?.isPremiumUser;
-
+  const showLocked =
+    accessLevel?.toLowerCase() === "premium" && !loggedUser?.isPremium;
 
 
   const handleViewDetails = () => {
     if (showLocked) {
-      navigate("/taka"); // route for upgrade
+      navigate("/payment-to-upgrade"); // route for upgrade
     } else {
       navigate(`/lisson/${lesson._id}`); // route for normal view
     }
   };
-  if(loading){
-    return <LoaderSpainer/>
+  if (loading) {
+    return <LoaderSpainer />;
   }
 
   return (

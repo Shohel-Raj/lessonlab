@@ -2,11 +2,30 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../Context/useAuth";
 import Wraper from "../Components/Wraper";
+import { UserUtils } from "../Utils/UserUtils";
+import { toast } from "react-toastify";
+import LoaderSpainer from "../Components/Loader/LoaderSpainer";
 
 const PricingUpgradePage = () => {
   const navigate = useNavigate();
   const [stateLoader, setLoading] = useState(false);
   const { loading, user } = useAuth();
+  const [loggedUser, setLoggedUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken(); // get Firebase token
+        const data = await UserUtils.getCurrentUser(token); // fetch user from backend
+        setLoggedUser(data);
+      } catch (err) {
+        toast.error("Error fetching logged user:", err);
+      }
+    };
+
+    fetchUser();
+  }, [user]);
 
   useEffect(() => {
     // Redirect if user not logged in
@@ -16,7 +35,7 @@ const PricingUpgradePage = () => {
   }, [user, navigate]);
 
   // Redirect to home if user already premium
-  if (user?.isPremium) {
+  if (loggedUser?.isPremium) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
@@ -32,27 +51,12 @@ const PricingUpgradePage = () => {
   }
 
   const handleUpgrade = async () => {
-    try {
-      setLoading(true);
-      // Call your backend to create checkout session
-      const res = await fetch("/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: user._id }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url; // Redirect to Stripe Checkout
-      }
-    } catch (error) {
-      console.error("Stripe Checkout Error:", error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    navigate("payment-to-upgrade");
   };
+
+  if (!loggedUser || loading) {
+    return <LoaderSpainer />;
+  }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 py-16">

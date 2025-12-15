@@ -20,6 +20,9 @@ import ReportedLessons from "../Pages/Dashboard/admin/ReportedLessons";
 import ErrorPage from "../Pages/ErrorPage";
 import AdminRoute from "./AdminRoute";
 import ProtectedRouts from "./ProtectedRouts";
+import Payment from "../Pages/Payment";
+import PaymentSuccess from "../Components/Payments/PaymentSuccess";
+import PaymentCancel from "../Components/Payments/PaymentCancel";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +44,18 @@ const router = createBrowserRouter([
       {
         path: "/lessons",
         Component: PublicLessons,
+      },
+      {
+        path: "payment-to-upgrade",
+        element:<ProtectedRouts><Payment/></ProtectedRouts>
+      },
+      {
+        path: "/payment/success",
+        element:<ProtectedRouts><PaymentSuccess/></ProtectedRouts>
+      },
+      {
+        path: "/payment/cancel",
+        element:<ProtectedRouts><PaymentCancel/></ProtectedRouts>
       },
     ],
   },

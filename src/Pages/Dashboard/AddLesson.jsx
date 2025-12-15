@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../../Context/useAuth";
 import axios from "axios";
 import { FiStar, FiHeart } from "react-icons/fi";
 import { FaIdBadge } from "react-icons/fa";
+import { UserUtils } from "../../Utils/UserUtils";
 
 const categories = [
   "Personal Growth",
@@ -25,6 +26,22 @@ const AddLesson = () => {
   const [accessLevel, setAccessLevel] = useState("Free");
   const [imageUrl, setImageUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [loggedUser, setLoggedUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken(); // get Firebase token
+        const data = await UserUtils.getCurrentUser(token); // fetch user from backend
+        setLoggedUser(data);
+      } catch (err) {
+        toast.error("Error fetching logged user:", err);
+      }
+    };
+
+    fetchUser();
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,7 +70,7 @@ const AddLesson = () => {
         .post(`${import.meta.env.VITE_ApiCall}/addlesson`, lessonData)
         .then((res) => {
           if (res.data.success) {
-            toast.success('Lesson Successfully added');
+            toast.success("Lesson Successfully added");
             e.target.reset();
           }
         })
@@ -154,22 +171,26 @@ const AddLesson = () => {
             <option>Private</option>
           </select>
 
-          <select
-            value={accessLevel}
-            onChange={(e) => setAccessLevel(e.target.value)}
-            className={`border border-gray-300 dark:border-gray-700 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-gray-500 transition w-full ${
-              user?.isPremium ? "" : "opacity-50 cursor-not-allowed"
-            }`}
-            disabled={!user?.isPremium}
-            title={
-              !user?.isPremium
-                ? "Upgrade to Premium to create Premium lessons"
-                : ""
-            }
-          >
-            <option>Free</option>
-            <option>Premium</option>
-          </select>
+         <select
+  value={accessLevel}
+  onChange={(e) => setAccessLevel(e.target.value)}
+  className={`border rounded-lg p-3 focus:outline-none focus:ring-2 transition w-full
+    ${
+      loggedUser?.isPremium
+        ? "border-gray-300 dark:border-gray-700 focus:ring-gray-500" // Normal styling for premium
+        : "border-gray-300 dark:border-gray-700 opacity-50 cursor-not-allowed focus:ring-0" // Greyed out for non-premium
+    }`}
+  disabled={!loggedUser?.isPremium}
+  title={
+    !loggedUser?.isPremium
+      ? "Upgrade to Premium to create Premium lessons"
+      : ""
+  }
+>
+  <option>Free</option>
+  <option>Premium</option>
+</select>
+
         </div>
 
         <button
