@@ -25,7 +25,7 @@ This project is built as part of **B12-A11 Category-03 Assignment**, following a
 - 💎 **Free & Premium Plans**
   - Free users can access public free lessons
   - Premium users unlock premium lessons
-  - Stripe one-time payment (৳1500 lifetime access)
+  - Stripe one-time payment
 
 - 📝 **Life Lesson Management**
   - Create, update, delete lessons
