@@ -9,12 +9,10 @@ import { ToastContainer } from "react-toastify";
 import router from "./Router/router.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+ <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router}>
-        <MainLayout />
-              <ToastContainer/>
-      </RouterProvider>
+      <RouterProvider router={router} />
+      <ToastContainer />
     </AuthProvider>
   </StrictMode>
 );

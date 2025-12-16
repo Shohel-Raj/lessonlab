@@ -16,11 +16,14 @@ const PricingUpgradePage = () => {
     const fetchUser = async () => {
       if (!user) return;
       try {
+        setLoading(true)
         const token = await user.getIdToken(); // get Firebase token
         const data = await UserUtils.getCurrentUser(token); // fetch user from backend
         setLoggedUser(data);
+        setLoading(false)
       } catch (err) {
         toast.error("Error fetching logged user:", err);
+        setLoading(false)
       }
     };
 
@@ -30,7 +33,7 @@ const PricingUpgradePage = () => {
   useEffect(() => {
     // Redirect if user not logged in
     if (!user) {
-      navigate("/login");
+      navigate("auth/login");
     }
   }, [user, navigate]);
 

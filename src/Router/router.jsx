@@ -19,56 +19,59 @@ import ManageLessons from "../Pages/Dashboard/admin/ManageLesson";
 import ReportedLessons from "../Pages/Dashboard/admin/ReportedLessons";
 import ErrorPage from "../Pages/ErrorPage";
 import AdminRoute from "./AdminRoute";
-import ProtectedRouts from "./ProtectedRouts";
 import Payment from "../Pages/Payment";
 import PaymentSuccess from "../Components/Payments/PaymentSuccess";
 import PaymentCancel from "../Components/Payments/PaymentCancel";
+import ProtectedRoutes from "./ProtectedRouts"
 
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: MainLayout,
+    element: <MainLayout />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, Component: Home },
-      { path: "auth/login", Component: Login },
-      { path: "auth/register", Component: Register },
-      {
-        path: "/upgrade-plan",
-        Component: PricingUpgradePage,
-      },
-      {
-        path: "/lisson/:id",
-        Component: LifeLessonDetailsPage,
-      },
-      {
-        path: "/lessons",
-        Component: PublicLessons,
-      },
+      { index: true, element: <Home /> },
+      { path: "auth/login", element: <Login /> },
+      { path: "auth/register", element: <Register /> },
+      { path: "upgrade-plan", element: <ProtectedRoutes><PricingUpgradePage /> </ProtectedRoutes>},
+      { path: "lisson/:id", element: <ProtectedRoutes><LifeLessonDetailsPage /> </ProtectedRoutes>},
+      { path: "lessons", element: <PublicLessons /> },
       {
         path: "payment-to-upgrade",
-        element:<ProtectedRouts><Payment/></ProtectedRouts>
+        element: (
+          <ProtectedRoutes>
+            <Payment />
+          </ProtectedRoutes>
+        ),
       },
       {
-        path: "/payment/success",
-        element:<ProtectedRouts><PaymentSuccess/></ProtectedRouts>
+        path: "payment/success",
+        element: (
+          <ProtectedRoutes>
+            <PaymentSuccess />
+          </ProtectedRoutes>
+        ),
       },
       {
-        path: "/payment/cancel",
-        element:<ProtectedRouts><PaymentCancel/></ProtectedRouts>
+        path: "payment/cancel",
+        element: (
+          <ProtectedRoutes>
+            <PaymentCancel />
+          </ProtectedRoutes>
+        ),
       },
     ],
   },
   {
     path: "/dashboard",
     element: (
-      <ProtectedRouts>
+      <ProtectedRoutes>
         <DashboardLayout />
-      </ProtectedRouts>
+      </ProtectedRoutes>
     ),
     children: [
-      { index: true, Component: DashboardHome },
-      { path: "user", Component: DashoardHomeUser },
+      { index: true, element: <DashboardHome /> },
+      { path: "user", element: <DashoardHomeUser /> },
       {
         path: "admin",
         element: (
@@ -77,25 +80,13 @@ const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
-      { path: "admin/manage-users", Component: ManageUsers },
-      { path: "admin/manage-lessons", Component: ManageLessons },
-      { path: "admin/reported-lessons", Component: ReportedLessons },
-      {
-        path: "profile",
-        Component: Profile,
-      },
-      {
-        path: "add-lesson",
-        Component: AddLesson,
-      },
-      {
-        path: "my-lessons",
-        Component: MyLessons,
-      },
-      {
-        path: "favorites",
-        Component: Favorites,
-      },
+      { path: "admin/manage-users", element: <ManageUsers /> },
+      { path: "admin/manage-lessons", element: <ManageLessons /> },
+      { path: "admin/reported-lessons", element: <ReportedLessons /> },
+      { path: "profile", element: <Profile /> },
+      { path: "add-lesson", element: <AddLesson /> },
+      { path: "my-lessons", element: <MyLessons /> },
+      { path: "favorites", element: <Favorites /> },
     ],
   },
 ]);

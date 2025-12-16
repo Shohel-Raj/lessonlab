@@ -1,23 +1,15 @@
 import React from "react";
-import { Navigate,  useLocation } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../Context/useAuth";
 import LoaderSpainer from "../Components/Loader/LoaderSpainer";
 
-
-const ProtectedRouts = ({ children }) => {
+const ProtectedRoutes = ({ children }) => {
   const { user, loading } = useAuth();
-  const location = useLocation(); // current attempted route
+  const location = useLocation();
 
-  if (loading) {
-    return <LoaderSpainer />; 
-  }
-
-  if (!user) {
-    // redirect to login and store the original destination in state
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  return children;
+  if (loading) return <LoaderSpainer />;
+  if (user) return children;            
+  return <Navigate to="/auth/login" state={{ from: location }} replace />;
 };
 
-export default ProtectedRouts;
+export default ProtectedRoutes;

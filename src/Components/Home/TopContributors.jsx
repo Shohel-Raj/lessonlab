@@ -52,7 +52,7 @@ const TopContributors = ({ contributors = [] }) => {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col items-center transition-transform transform hover:scale-105 hover:shadow-2xl"
             >
               <img
-                src={user.author_photo}
+                src={user?.author_photo}
                 alt={user.author_name}
                 className="w-20 h-20 rounded-full object-cover mb-4"
               />
