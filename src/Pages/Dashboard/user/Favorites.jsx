@@ -17,9 +17,7 @@ const Favorites = () => {
       setLoading(true);
       const token = await user.getIdToken();
       const res = await axios.get(
-        `${
-          import.meta.env.VITE_ApiCall
-        }/my-favorites?category=${category}&tone=${tone}`,
+        `${import.meta.env.VITE_ApiCall}/my-favorites?category=${category}&tone=${tone}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -56,13 +54,15 @@ const Favorites = () => {
   if (loading) return <LoaderSpainer />;
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">My Favorites</h2>
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+        My Favorites
+      </h2>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-4 mb-6 flex-wrap">
         <select
-          className="border p-2 rounded"
+          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white dark:border-gray-700"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -77,7 +77,7 @@ const Favorites = () => {
         </select>
 
         <select
-          className="border p-2 rounded"
+          className="border p-2 rounded bg-white dark:bg-gray-800 dark:text-white dark:border-gray-700"
           value={tone}
           onChange={(e) => setTone(e.target.value)}
         >
@@ -92,10 +92,10 @@ const Favorites = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="table w-full border">
-          <thead className="bg-gray-100">
-            <tr>
+      <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
+        <table className="table w-full">
+          <thead className="bg-gray-100 dark:bg-gray-800">
+            <tr className="text-gray-700 dark:text-gray-200">
               <th>Title</th>
               <th>Category</th>
               <th>Emotional Tone</th>
@@ -103,16 +103,23 @@ const Favorites = () => {
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+
+          <tbody className="bg-white dark:bg-gray-900">
             {favorites.length === 0 ? (
               <tr>
-                <td colSpan="5" className="text-center py-6">
+                <td
+                  colSpan="5"
+                  className="text-center py-6 text-gray-500 dark:text-gray-400"
+                >
                   No favorites found
                 </td>
               </tr>
             ) : (
               favorites.map((lesson) => (
-                <tr key={lesson._id}>
+                <tr
+                  key={lesson._id}
+                  className="border-t dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                >
                   <td className="font-medium">{lesson.title}</td>
                   <td>{lesson.category}</td>
                   <td>{lesson.emotionalTone}</td>
